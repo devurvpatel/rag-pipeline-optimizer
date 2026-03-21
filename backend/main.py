@@ -320,7 +320,7 @@ async def evaluate_all_pipelines(request: EvaluateRequest):
             all_ragas_results = {}
 
             for result in valid_results:
-                scores = evaluate_pipeline(
+                scores = await evaluate_pipeline(
                     pipeline_name=result["pipeline_name"],
                     questions=[request.question],
                     answers=[result["answer"]],

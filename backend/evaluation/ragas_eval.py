@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 # Point RAGAS to OpenAI API
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY", "")
 
+import asyncio
+from functools import partial
+
 from datasets import Dataset
 from ragas import evaluate
 from ragas.metrics import (
@@ -42,7 +45,7 @@ def get_ragas_config():
     return llm, embeddings
 
 
-def evaluate_pipeline(
+async def evaluate_pipeline(
     pipeline_name: str,
     questions: List[str],
     answers: List[str],
@@ -96,11 +99,17 @@ def evaluate_pipeline(
         ContextRecall(llm=llm),
     ]
 
+    
     # Run evaluation
-    results = evaluate(
+    # Run RAGAS in a thread executor to avoid nested event loop
+    # issues on Linux/Docker with uvloop
+    loop = asyncio.get_event_loop()
+    evaluate_func = partial(
+        evaluate,
         dataset=dataset,
         metrics=metrics,
     )
+    results = await loop.run_in_executor(None, evaluate_func)
 
     # Convert to pandas for easy extraction
     results_df = results.to_pandas()

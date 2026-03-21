@@ -77,7 +77,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-BACKEND_URL = "http://localhost:8000"
+import os
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 # ── Pipeline Info ──────────────────────────────────────────────────────────────
 PIPELINE_INFO = {
@@ -103,15 +104,14 @@ PIPELINE_INFO = {
     },
 }
 
-
-# ── Helper Functions ───────────────────────────────────────────────────────────
+# ── Helper Functions ──
 def upload_file(file):
     """Send PDF to backend /upload endpoint."""
-    files = {"file": (file.name, file.getvalue(), "application/pdf")}
+    file_bytes = file.read()
+    files = {"file": (file.name, file_bytes, "application/pdf")}
     response = requests.post(f"{BACKEND_URL}/upload", files=files, timeout=300)
     response.raise_for_status()
     return response.json()
-
 
 def evaluate(question, ground_truth):
     """Send question to backend /evaluate endpoint."""
@@ -264,6 +264,7 @@ with st.sidebar:
         if st.button("Process Document"):
             with st.spinner("Processing PDF through all 3 chunking strategies..."):
                 try:
+                    uploaded_file.seek(0)
                     result = upload_file(uploaded_file)
                     st.session_state["upload_result"] = result
                     st.session_state["document_ready"] = True
