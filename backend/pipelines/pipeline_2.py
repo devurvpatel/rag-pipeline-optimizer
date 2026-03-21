@@ -10,6 +10,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.vectorstores import VectorStore
 from langchain_core.documents import Document
 from langchain_classic.retrievers import ContextualCompressionRetriever
+from langchain_community.callbacks import get_openai_callback
 
 load_dotenv()
 
@@ -91,7 +92,6 @@ def build_pipeline_2(vectorstore: VectorStore):
 
     return chain
 
-
 async def run_pipeline_2(
     vectorstore: VectorStore,
     question: str,
@@ -106,7 +106,6 @@ async def run_pipeline_2(
     Returns:
         Dict with keys: answer, retrieved_chunks, pipeline_name
     """
-    # Build reranking retriever separately to fetch chunks for RAGAS
     base_retriever = vectorstore.as_retriever(
         search_type="similarity",
         search_kwargs={"k": 10},
@@ -123,16 +122,32 @@ async def run_pipeline_2(
         base_retriever=base_retriever,
     )
 
-    # Fetch reranked chunks for RAGAS evaluation
     retrieved_docs = retriever.invoke(question)
     retrieved_chunks = [doc.page_content for doc in retrieved_docs]
 
-    # Run the full chain for the answer
     chain = build_pipeline_2(vectorstore)
-    answer = await chain.ainvoke(question)
+
+    with get_openai_callback() as cb:
+        answer = await chain.ainvoke(
+            question,
+            config={
+                "run_name": "Pipeline 2 — Recursive 1024 + Cohere + Cohere Rerank",
+                "metadata": {
+                    "pipeline_id": "pipeline_2",
+                    "chunking": "recursive_1024",
+                    "embeddings": "cohere_embed_v3",
+                    "reranking": "cohere_rerank_v3",
+                    "question": question,
+                }
+            }
+        )
+        actual_cost = round(cb.total_cost, 6)
+        tokens_used = cb.total_tokens
 
     return {
         "pipeline_name": "Pipeline 2 — Recursive 1024 + Cohere + Cohere Rerank",
         "answer": answer,
         "retrieved_chunks": retrieved_chunks,
+        "cost_usd": actual_cost,
+        "tokens_used": tokens_used,
     }

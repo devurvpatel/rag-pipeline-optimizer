@@ -70,67 +70,44 @@ Be direct and technical — this analysis is for an engineering team.
 # ── Node 2: Calculate Cost ─────────────────────────────────────────────────────
 def calculate_cost(state: EvaluatorState) -> Dict:
     """
-    Node 2 — Hardcodes cost estimates per 1000 queries for each pipeline.
-    Based on public API pricing as of 2024.
-
-    Cost assumptions per query:
-    - Average question: ~50 tokens
-    - Average context passed to LLM: ~800 tokens
-    - Average answer: ~200 tokens
-    - OpenAI ada-002 embeddings: $0.10 per 1M tokens
-    - Cohere embed-english-v3: $0.10 per 1M tokens
-    - Cohere Rerank v3: $2.00 per 1000 searches
-    - BGE-large + Cross-encoder: $0 (runs locally)
-    - GPT-4o-mini: $0.15 input / $0.60 output per 1M tokens
-
-    Reads:  nothing (hardcoded)
-    Writes: state["cost_data"]
+    Node 2 — Uses live costs from OpenAI callback if available.
+    Falls back to estimates if live costs not provided.
     """
-    print("Node 2: Calculating cost estimates...")
+    print("Node 2: Processing cost data...")
 
+    # If live costs were passed in from the API callback use them
+    if state["cost_data"]:
+        print("Using live costs from OpenAI API callback")
+        return {"cost_data": state["cost_data"]}
+
+    # Fallback — estimates only if live costs not available
+    print("No live costs available — using estimates")
     cost_data = {
         "Pipeline 1 — Fixed 512 + OpenAI": {
-            "embedding_model": "OpenAI text-embedding-ada-002",
-            "embedding_cost": "$0.10 per 1M tokens",
+            "embedding_model": "OpenAI ada-002",
             "reranking": "None",
-            "reranking_cost": "$0",
             "llm": "GPT-4o-mini",
-            "llm_cost": "$0.60 per 1M output tokens",
-            "estimated_per_1k_queries": "$0.45",
-            "monthly_cost_10k_queries": "$4.50",
+            "note": "Estimated — no live data available",
         },
         "Pipeline 2 — Recursive + Cohere Rerank": {
-            "embedding_model": "Cohere embed-english-v3.0",
-            "embedding_cost": "$0.10 per 1M tokens",
-            "reranking": "Cohere Rerank v3.0",
-            "reranking_cost": "$2.00 per 1000 searches",
+            "embedding_model": "Cohere embed-v3",
+            "reranking": "Cohere Rerank ($2/1k searches)",
             "llm": "GPT-4o-mini",
-            "llm_cost": "$0.60 per 1M output tokens",
-            "estimated_per_1k_queries": "$2.55",
-            "monthly_cost_10k_queries": "$25.50",
+            "note": "Estimated — no live data available",
         },
         "Pipeline 3 — Semantic + BGE + Cross-Encoder": {
-            "embedding_model": "BGE-large-en-v1.5 (local)",
-            "embedding_cost": "$0 (open source)",
-            "reranking": "ms-marco-MiniLM cross-encoder (local)",
-            "reranking_cost": "$0 (open source)",
+            "embedding_model": "BGE-large (free, local)",
+            "reranking": "Cross-Encoder (free, local)",
             "llm": "GPT-4o-mini",
-            "llm_cost": "$0.60 per 1M output tokens",
-            "estimated_per_1k_queries": "$0.15",
-            "monthly_cost_10k_queries": "$1.50",
+            "note": "Estimated — no live data available",
         },
         "Pipeline 4 — Fixed 1024 + MMR": {
-            "embedding_model": "OpenAI text-embedding-ada-002",
-            "embedding_cost": "$0.10 per 1M tokens",
-            "reranking": "MMR (built-in, no extra cost)",
-            "reranking_cost": "$0",
+            "embedding_model": "OpenAI ada-002",
+            "reranking": "MMR (free, built-in)",
             "llm": "GPT-4o-mini",
-            "llm_cost": "$0.60 per 1M output tokens",
-            "estimated_per_1k_queries": "$0.45",
-            "monthly_cost_10k_queries": "$4.50",
+            "note": "Estimated — no live data available",
         },
     }
-
     return {"cost_data": cost_data}
 
 
@@ -157,21 +134,24 @@ You are an expert RAG systems architect making a recommendation to an engineerin
 RAGAS Evaluation Analysis:
 {state["analysis"]}
 
-Cost Data:
+Cost Data (LIVE costs from actual API calls this session):
 {json.dumps(state["cost_data"], indent=2)}
 
 Raw Scores:
 {json.dumps(state["pipeline_scores"], indent=2)}
 
-Based on both performance AND cost, provide a structured recommendation.
-You MUST respond in EXACTLY this format with these exact labels:
+Based on both performance AND actual measured cost, provide a structured recommendation.
+Note: cost_usd_this_query shows the REAL cost measured from the OpenAI API for this query.
+Use these real costs to inform your cost-efficiency recommendation.
+
+You MUST respond in EXACTLY this format:
 
 WINNER: [Pipeline name]
-REASON: [2-3 sentences explaining why this pipeline wins considering both performance and cost]
+REASON: [2-3 sentences explaining why this pipeline wins considering both performance and real measured cost]
 TRADEOFF: [1-2 sentences on what you sacrifice by choosing this pipeline]
-BEST_FOR_QUALITY: [Pipeline name if cost is no concern — pure performance winner]
-BEST_FOR_COST: [Pipeline name if you need the lowest cost with acceptable performance]
-PRODUCTION_ADVICE: [1-2 sentences of practical advice for deploying this in production]
+BEST_FOR_QUALITY: [Pipeline name if cost is no concern]
+BEST_FOR_COST: [Pipeline name with best performance per dollar based on real costs]
+PRODUCTION_ADVICE: [1-2 sentences of practical advice]
 """)
 
     return {"recommendation": response.content}
@@ -245,23 +225,22 @@ def build_evaluator_agent() -> StateGraph:
 
 
 # ── Convenience Function ───────────────────────────────────────────────────────
-def run_evaluation(pipeline_scores: Dict) -> Dict:
+def run_evaluation(pipeline_scores: Dict, live_costs: Dict = None) -> Dict:
     """
-    Convenience function to run the full evaluator agent in one call.
+    Convenience function to run the full evaluator agent.
 
     Args:
         pipeline_scores: Dict of {pipeline_name: {metric: score}}
-                         Output from ragas_eval.evaluate_pipeline()
+        live_costs: Dict of {pipeline_name: {cost_usd_this_query, tokens_used}}
 
     Returns:
-        final_report dict with winner, reason, tradeoff, costs, and scores
+        final_report dict
     """
     agent = build_evaluator_agent()
 
-    # Initialize state — all fields must be present even if empty
     initial_state = {
         "pipeline_scores": pipeline_scores,
-        "cost_data": {},
+        "cost_data": live_costs or {},
         "analysis": "",
         "recommendation": "",
         "final_report": {},

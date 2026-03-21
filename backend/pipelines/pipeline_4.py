@@ -8,6 +8,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.vectorstores import VectorStore
 from langchain_core.documents import Document
+from langchain_community.callbacks import get_openai_callback
 
 load_dotenv()
 
@@ -99,7 +100,6 @@ async def run_pipeline_4(
     Returns:
         Dict with keys: answer, retrieved_chunks, pipeline_name
     """
-    # Build MMR retriever separately to fetch chunks for RAGAS evaluation
     retriever = vectorstore.as_retriever(
         search_type="mmr",
         search_kwargs={
@@ -109,16 +109,32 @@ async def run_pipeline_4(
         },
     )
 
-    # Fetch diverse chunks for RAGAS evaluation
     retrieved_docs = retriever.invoke(question)
     retrieved_chunks = [doc.page_content for doc in retrieved_docs]
 
-    # Run the full chain for the answer
     chain = build_pipeline_4(vectorstore)
-    answer = await chain.ainvoke(question)
+
+    with get_openai_callback() as cb:
+        answer = await chain.ainvoke(
+            question,
+            config={
+                "run_name": "Pipeline 4 — Fixed 1024 + OpenAI + MMR Retrieval",
+                "metadata": {
+                    "pipeline_id": "pipeline_4",
+                    "chunking": "fixed_1024",
+                    "embeddings": "openai_ada002",
+                    "reranking": "mmr",
+                    "question": question,
+                }
+            }
+        )
+        actual_cost = round(cb.total_cost, 6)
+        tokens_used = cb.total_tokens
 
     return {
         "pipeline_name": "Pipeline 4 — Fixed 1024 + OpenAI + MMR Retrieval",
         "answer": answer,
         "retrieved_chunks": retrieved_chunks,
+        "cost_usd": actual_cost,
+        "tokens_used": tokens_used,
     }

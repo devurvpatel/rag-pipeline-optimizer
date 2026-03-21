@@ -12,6 +12,7 @@ from langchain_core.vectorstores import VectorStore
 from langchain_core.documents import Document
 from langchain_classic.retrievers import ContextualCompressionRetriever
 from langchain_classic.retrievers.document_compressors import CrossEncoderReranker
+from langchain_community.callbacks import get_openai_callback
 
 load_dotenv()
 
@@ -132,7 +133,6 @@ async def run_pipeline_3(
     Returns:
         Dict with keys: answer, retrieved_chunks, pipeline_name
     """
-    # Build retriever separately to fetch chunks for RAGAS evaluation
     base_retriever = vectorstore.as_retriever(
         search_type="similarity",
         search_kwargs={"k": 10},
@@ -152,16 +152,34 @@ async def run_pipeline_3(
         base_retriever=base_retriever,
     )
 
-    # Fetch reranked chunks for RAGAS evaluation
     retrieved_docs = retriever.invoke(question)
     retrieved_chunks = [doc.page_content for doc in retrieved_docs]
 
-    # Run the full chain for the answer
     chain = build_pipeline_3(vectorstore)
-    answer = await chain.ainvoke(question)
+
+    # Note: BGE embeddings and cross-encoder are free (local)
+    # callback only captures GPT-4o-mini LLM cost
+    with get_openai_callback() as cb:
+        answer = await chain.ainvoke(
+            question,
+            config={
+                "run_name": "Pipeline 3 — Semantic + BGE + Cross-Encoder Rerank",
+                "metadata": {
+                    "pipeline_id": "pipeline_3",
+                    "chunking": "semantic",
+                    "embeddings": "bge_large_en_v1.5",
+                    "reranking": "cross_encoder_ms_marco",
+                    "question": question,
+                }
+            }
+        )
+        actual_cost = round(cb.total_cost, 6)
+        tokens_used = cb.total_tokens
 
     return {
         "pipeline_name": "Pipeline 3 — Semantic + BGE + Cross-Encoder Rerank",
         "answer": answer,
         "retrieved_chunks": retrieved_chunks,
+        "cost_usd": actual_cost,
+        "tokens_used": tokens_used,
     }

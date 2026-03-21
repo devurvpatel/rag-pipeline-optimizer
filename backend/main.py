@@ -9,6 +9,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+load_dotenv()
+
+os.environ["LANGSMITH_TRACING"] = "true"
+os.environ["LANGSMITH_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGSMITH_API_KEY"] = os.getenv("LANGSMITH_API_KEY", "")
+os.environ["LANGSMITH_PROJECT"] = os.getenv("LANGSMITH_PROJECT", "rag-pipeline-optimizer")
+
 from langchain_openai import OpenAIEmbeddings
 from langchain_cohere import CohereEmbeddings
 
@@ -23,8 +30,6 @@ from backend.pipelines.pipeline_3 import build_pipeline_3, run_pipeline_3, get_b
 from backend.pipelines.pipeline_4 import build_pipeline_4, run_pipeline_4
 from backend.evaluation.ragas_eval import evaluate_pipeline, compare_pipelines
 from backend.evaluation.langgraph_agent import run_evaluation
-
-load_dotenv()
 
 # ── Logging Setup ──────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -293,6 +298,8 @@ async def evaluate_all_pipelines(request: EvaluateRequest):
                 pipeline_results[result["pipeline_name"]] = {
                     "answer": result["answer"],
                     "chunks_retrieved": len(result["retrieved_chunks"]),
+                    "cost_usd": result.get("cost_usd", 0),
+                    "tokens_used": result.get("tokens_used", 0),
                 }
                 valid_results.append(result)
 
@@ -328,7 +335,20 @@ async def evaluate_all_pipelines(request: EvaluateRequest):
 
             # Run LangGraph evaluator agent
             logger.info("Running LangGraph evaluator agent...")
-            agent_report = run_evaluation(all_ragas_results)
+
+            # Collect live costs from pipeline results
+            live_costs = {
+                result["pipeline_name"]: {
+                    "cost_usd_this_query": result.get("cost_usd", 0),
+                    "tokens_used": result.get("tokens_used", 0),
+                    "embedding_model": ["OpenAI ada-002", "Cohere embed-v3", "BGE-large (free)", "OpenAI ada-002"][i],
+                    "reranking": ["None", "Cohere Rerank ($2/1k)", "Cross-Encoder (free)", "MMR (free)"][i],
+                }
+                for i, result in enumerate(valid_results)
+            }
+
+            # Run LangGraph evaluator agent with live costs
+            agent_report = run_evaluation(all_ragas_results, live_costs)
 
         else:
             logger.info("No ground truth provided — skipping RAGAS evaluation")

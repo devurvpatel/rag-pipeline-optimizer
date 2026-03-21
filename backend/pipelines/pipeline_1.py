@@ -8,6 +8,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.vectorstores import VectorStore
 from langchain_core.documents import Document
+from langchain_community.callbacks import get_openai_callback
 
 load_dotenv()
 
@@ -87,24 +88,46 @@ async def run_pipeline_1(
         question: The user's question string
 
     Returns:
-        Dict with keys: answer, retrieved_chunks, pipeline_name
+        Dict with keys: answer, retrieved_chunks, pipeline_name, cost_usd, tokens_used
     """
-    # Get retrieved chunks separately for RAGAS evaluation
     retriever = vectorstore.as_retriever(
         search_type="similarity",
         search_kwargs={"k": 4},
     )
 
-    # Fetch chunks first so we can pass them to RAGAS later
     retrieved_docs = retriever.invoke(question)
     retrieved_chunks = [doc.page_content for doc in retrieved_docs]
 
-    # Run the full chain for the answer
     chain = build_pipeline_1(vectorstore)
-    answer = await chain.ainvoke(question)
+
+    try:
+        from langchain_community.callbacks import get_openai_callback
+        with get_openai_callback() as cb:
+            answer = await chain.ainvoke(
+                question,
+                config={
+                    "run_name": "Pipeline 1 — Fixed 512 + OpenAI + No Rerank",
+                    "metadata": {
+                        "pipeline_id": "pipeline_1",
+                        "chunking": "fixed_512",
+                        "embeddings": "openai_ada002",
+                        "reranking": "none",
+                        "question": question,
+                    }
+                }
+            )
+            actual_cost = round(cb.total_cost, 6)
+            tokens_used = cb.total_tokens
+    except ImportError:
+        # Fallback if callback import fails
+        answer = await chain.ainvoke(question)
+        actual_cost = 0.0
+        tokens_used = 0
 
     return {
         "pipeline_name": "Pipeline 1 — Fixed 512 + OpenAI + No Rerank",
         "answer": answer,
         "retrieved_chunks": retrieved_chunks,
+        "cost_usd": actual_cost,
+        "tokens_used": tokens_used,
     }
