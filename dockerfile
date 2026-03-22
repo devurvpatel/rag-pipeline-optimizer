@@ -22,7 +22,7 @@ RUN mkdir -p data/sample_docs
 
 # Pre-download BGE and cross-encoder models during build
 # This prevents startup delays and timeout issues on Render
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-small-en-v1.5')"
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-large-en-v1.5')"
 RUN python -c "from sentence_transformers import CrossEncoder; CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')"
 
 # Expose backend port
