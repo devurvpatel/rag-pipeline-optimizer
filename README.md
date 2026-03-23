@@ -1,4 +1,13 @@
-﻿# 🔍 RAG Pipeline Optimizer
+﻿---
+title: RAG Pipeline Optimizer
+emoji: 🔍
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
+# 🔍 RAG Pipeline Optimizer
 
 A production-grade benchmarking system that runs 4 RAG pipeline configurations simultaneously, evaluates them using the RAGAS framework, and uses a LangGraph agent to recommend the optimal configuration for your specific documents.
 
