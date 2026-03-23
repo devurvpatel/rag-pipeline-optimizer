@@ -1,20 +1,20 @@
 ﻿# 🔍 RAG Pipeline Optimizer
 
-A production-grade benchmarking system that runs 4 RAG pipeline configurations simultaneously, evaluates them scientifically using the RAGAS framework, and uses a LangGraph agent to recommend the optimal configuration for your specific documents. This is an MLOps project — not a RAG chatbot demo.
+A production-grade benchmarking system that runs 4 RAG pipeline configurations simultaneously, evaluates them using the RAGAS framework, and uses a LangGraph agent to recommend the optimal configuration for your specific documents.
 
 ---
 
 ## 🎯 Why This Project Is Different
 
-Most RAG portfolio projects show you a chatbot that answers questions. This project asks a harder question: **which RAG configuration actually works best for your data?**
+This project asks a harder question: **which RAG configuration actually works best for your data?**
 
-The analogy for interviewers: this is A/B testing for AI retrieval systems. Companies spend months guessing whether their RAG is good. This system tells them in minutes by running 4 pipelines in parallel, scoring each on faithfulness, answer relevancy, context precision, and context recall using the industry-standard RAGAS evaluation framework — then having a LangGraph agent synthesize the scores and cost data into a structured recommendation.
+This is A/B testing for AI retrieval systems. Companies spend months guessing whether their RAG is good. This system tells them in minutes by running 4 pipelines in parallel, scoring each on faithfulness, answer relevancy, context precision, and context recall using the industry-standard RAGAS evaluation framework then having a LangGraph agent synthesize the scores and cost data into a structured recommendation.
 
 ---
 
 ## 🎬 Demo
 
-![RAG Pipeline Optimizer Demo](assets/demo.mp4)
+![RAG Pipeline Optimizer Demo](assets/demo.gif)
 
 ---
 
@@ -150,43 +150,6 @@ cp .env.example .env
 # Fill in your API keys in .env
 ```
 
-### Environment Variables
-
-```
-OPENAI_API_KEY=
-COHERE_API_KEY=
-LANGSMITH_API_KEY=
-LANGSMITH_TRACING=true
-LANGSMITH_ENDPOINT=https://api.smith.langchain.com
-LANGSMITH_PROJECT=
-QDRANT_URL=
-QDRANT_API_KEY=
-```
-
-### Run Locally
-
-**Terminal 1 — Start backend:**
-```bash
-python -m uvicorn backend.main:app --reload --port 8000
-```
-
-**Terminal 2 — Start frontend:**
-```bash
-python -m streamlit run frontend/app.py
-```
-
-Open `http://localhost:8501` in your browser.
-
-### Run with Docker
-
-```bash
-docker-compose up --build
-```
-
-- Frontend: `http://localhost:8501`
-- Backend API: `http://localhost:8000`
-- API Docs: `http://localhost:8000/docs`
-
 ---
 
 ## 📸 Screenshots
@@ -217,35 +180,6 @@ docker-compose up --build
 
 ---
 
-## 📁 Project Structure
-
-```
-rag-pipeline-optimizer/
-├── backend/
-│   ├── main.py                    # FastAPI + LangServe app
-│   ├── pipelines/
-│   │   ├── pipeline_1.py          # Fixed 512 + OpenAI + similarity
-│   │   ├── pipeline_2.py          # Recursive 1024 + Cohere + rerank
-│   │   ├── pipeline_3.py          # Semantic + BGE + cross-encoder
-│   │   └── pipeline_4.py          # Fixed 1024 + OpenAI + MMR
-│   ├── evaluation/
-│   │   ├── ragas_eval.py          # RAGAS evaluation framework
-│   │   └── langgraph_agent.py     # LangGraph evaluator agent
-│   └── utils/
-│       ├── document_processor.py  # PDF loading + 3 chunking strategies
-│       └── vector_store_manager.py # ChromaDB + Qdrant management
-├── frontend/
-│   └── app.py                     # Streamlit dashboard
-├── data/
-│   └── eval_dataset.py            # 25 ground truth Q&A pairs
-├── Dockerfile
-├── Dockerfile.streamlit
-├── docker-compose.yml
-└── requirements.txt
-```
-
----
-
 ## 🔗 Live Demo
 
 [HuggingFace Spaces — Live Demo](https://huggingface.co/spaces/urvpatel/rag-pipeline-optimizer)
@@ -257,7 +191,6 @@ rag-pipeline-optimizer/
 **Urv Patel** — Data Analyst transitioning to AI Engineering
 
 - GitHub: [@devurvpatel](https://github.com/devurvpatel)
-- Built as part of an AI Engineering portfolio
 
 ---
 
