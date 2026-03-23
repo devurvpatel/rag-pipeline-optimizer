@@ -191,38 +191,29 @@ docker-compose up --build
 
 ## 📸 Screenshots
 
----
-
 ### 📝 4 Pipeline Answers Side by Side
 ![4 Pipeline Answers](assets/4%20pipeline%20answers.png)
-
----
 
 ### 📊 Performance vs Cost Analysis
 ![Performance vs Cost Charts](assets/performance%20vs%20cost%20charts.png)
 
----
-
 ### 📈 RAGAS Evaluation Scores
 ![RAGAS Evaluation](assets/RAGAS%20evaluation.png)
-
----
 
 ### 🤖 LangGraph Agent Recommendation
 ![LangGraph Agent Recommendation](assets/Langgraph%20Agent%20Recommendation.png)
 
----
-
 ### 📋 Full Analysis Report
 ![Full Analysis Report](assets/Full%20Analysis%20Report.png)
 
----
-
 ### 🔍 LangSmith Traces
+
+#### Comparing 4 Pipelines
+![Langsmith comparing 4 pipelines](assets/Langsmith%20comparing%204%20pipelines.png)
+
+#### Deeper Analysis of Trace
 ![LangSmith Trace 1](assets/Langsmith%20Trace1.png)
 ![LangSmith Trace 2](assets/Langsmith%20Trace2.png)
-![Langsmith comparing 4 pipelines](assets/Langsmith%20comparing%204%20pipelines.png)
-```
 
 ---
 
