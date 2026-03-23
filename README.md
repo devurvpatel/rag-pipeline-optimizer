@@ -14,7 +14,7 @@ The analogy for interviewers: this is A/B testing for AI retrieval systems. Comp
 
 ## 🎬 Demo
 
-![RAG Pipeline Optimizer Demo](assets/demo.gif)
+![RAG Pipeline Optimizer Demo](assets/demo.mp4)
 
 ---
 
@@ -190,11 +190,6 @@ docker-compose up --build
 ---
 
 ## 📸 Screenshots
-
-## 📸 Screenshots & Demo
-
-### 🎬 Full Demo
-![RAG Pipeline Optimizer Demo](assets/demo.gif)
 
 ---
 
