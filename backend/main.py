@@ -1,12 +1,4 @@
 import os
-import logging
-import asyncio
-from contextlib import asynccontextmanager
-from typing import Optional
-
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,6 +7,15 @@ os.environ["LANGSMITH_TRACING"] = "true"
 os.environ["LANGSMITH_ENDPOINT"] = "https://api.smith.langchain.com"
 os.environ["LANGSMITH_API_KEY"] = os.getenv("LANGSMITH_API_KEY", "")
 os.environ["LANGSMITH_PROJECT"] = os.getenv("LANGSMITH_PROJECT", "rag-pipeline-optimizer")
+
+import logging
+import asyncio
+from contextlib import asynccontextmanager
+from typing import Optional
+
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from langchain_openai import OpenAIEmbeddings
 from langchain_cohere import CohereEmbeddings
