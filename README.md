@@ -120,18 +120,6 @@ live cost tracking, winner recommendation)
 
 ---
 
-## 🔬 Key Findings
-
-
-
----
-
-## 💡 What I Learned
-
-
-
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -160,8 +148,6 @@ cp .env.example .env
 ```
 
 ---
-
-## 📸 Screenshots
 
 ### 📝 4 Pipeline Answers Side by Side
 ![4 Pipeline Answers](assets/4%20pipeline%20answers.png)
@@ -192,14 +178,6 @@ cp .env.example .env
 ## 🔗 Live Demo
 
 [HuggingFace Spaces — Live Demo](https://huggingface.co/spaces/urvpatel/rag-pipeline-optimizer)
-
----
-
-## 👤 Author
-
-**Urv Patel** — Data Analyst transitioning to AI Engineering
-
-- GitHub: [@devurvpatel](https://github.com/devurvpatel)
 
 ---
 
