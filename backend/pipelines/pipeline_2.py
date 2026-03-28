@@ -2,7 +2,7 @@ import os
 from typing import List, Dict
 from dotenv import load_dotenv
 
-from langchain_cohere import CohereEmbeddings, CohereRerank
+from langchain_cohere import CohereRerank
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser

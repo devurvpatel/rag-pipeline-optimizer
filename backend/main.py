@@ -1,6 +1,13 @@
+import asyncio
+import logging
 import os
+from contextlib import asynccontextmanager
+from typing import Optional
+
 from dotenv import load_dotenv
 
+# Load environment variables first — must happen before LangChain imports
+# so LangSmith tracing is configured before any LangChain module initializes
 load_dotenv()
 
 os.environ["LANGSMITH_TRACING"] = "true"
@@ -8,29 +15,23 @@ os.environ["LANGSMITH_ENDPOINT"] = "https://api.smith.langchain.com"
 os.environ["LANGSMITH_API_KEY"] = os.getenv("LANGSMITH_API_KEY", "")
 os.environ["LANGSMITH_PROJECT"] = os.getenv("LANGSMITH_PROJECT", "rag-pipeline-optimizer")
 
-import logging
-import asyncio
-from contextlib import asynccontextmanager
-from typing import Optional
-
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-
-from langchain_openai import OpenAIEmbeddings
-from langchain_cohere import CohereEmbeddings
-
-from backend.utils.document_processor import DocumentProcessor
-from backend.utils.vector_store_manager import (
+# LangChain imports after environment setup  # noqa: E402
+from fastapi import FastAPI, UploadFile, File, HTTPException  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from pydantic import BaseModel  # noqa: E402
+from langchain_openai import OpenAIEmbeddings  # noqa: E402
+from langchain_cohere import CohereEmbeddings  # noqa: E402
+from backend.utils.document_processor import DocumentProcessor  # noqa: E402
+from backend.utils.vector_store_manager import (  # noqa: E402
     VectorStoreManager,
     PIPELINE_1, PIPELINE_2, PIPELINE_3, PIPELINE_4,
 )
-from backend.pipelines.pipeline_1 import build_pipeline_1, run_pipeline_1
-from backend.pipelines.pipeline_2 import build_pipeline_2, run_pipeline_2
-from backend.pipelines.pipeline_3 import build_pipeline_3, run_pipeline_3, get_bge_embeddings
-from backend.pipelines.pipeline_4 import build_pipeline_4, run_pipeline_4
-from backend.evaluation.ragas_eval import evaluate_pipeline, compare_pipelines
-from backend.evaluation.langgraph_agent import run_evaluation
+from backend.pipelines.pipeline_1 import build_pipeline_1, run_pipeline_1  # noqa: E402
+from backend.pipelines.pipeline_2 import build_pipeline_2, run_pipeline_2  # noqa: E402
+from backend.pipelines.pipeline_3 import build_pipeline_3, run_pipeline_3, get_bge_embeddings  # noqa: E402
+from backend.pipelines.pipeline_4 import build_pipeline_4, run_pipeline_4  # noqa: E402
+from backend.evaluation.ragas_eval import evaluate_pipeline, compare_pipelines  # noqa: E402
+from backend.evaluation.langgraph_agent import run_evaluation  # noqa: E402
 
 # ── Logging Setup ──────────────────────────────────────────────────────────────
 logging.basicConfig(

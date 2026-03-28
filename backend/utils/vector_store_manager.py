@@ -1,13 +1,11 @@
 import os
-from typing import List, Optional
+from typing import List
 from dotenv import load_dotenv
 
 from langchain_chroma import Chroma
 from langchain_qdrant import QdrantVectorStore
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
 
 load_dotenv()
 

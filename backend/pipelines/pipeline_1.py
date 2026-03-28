@@ -2,13 +2,12 @@ import os
 from typing import List, Dict
 from dotenv import load_dotenv
 
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.vectorstores import VectorStore
 from langchain_core.documents import Document
-from langchain_community.callbacks import get_openai_callback
 
 load_dotenv()
 
