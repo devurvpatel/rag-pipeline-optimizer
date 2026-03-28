@@ -1,0 +1,30 @@
+name: Deploy to HuggingFace Spaces
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to HuggingFace
+    runs-on: ubuntu-latest
+    needs: [quality-gate, test, docker-build]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Push to HuggingFace Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git push https://urvpatel:${HF_TOKEN}@huggingface.co/spaces/urvpatel/rag-pipeline-optimizer main --force
