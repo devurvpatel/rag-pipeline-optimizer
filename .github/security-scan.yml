@@ -1,0 +1,38 @@
+name: Weekly Security Scan
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9am UTC
+  workflow_dispatch:
+
+jobs:
+  security:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Safety
+        run: pip install safety
+
+      - name: Run Safety CVE scan
+        run: |
+          safety check -r requirements.txt
+
+      - name: Run Bandit full scan
+        run: |
+          pip install bandit
+          bandit -r backend/ -f json -o bandit-report.json || true
+
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-security-report
+          path: bandit-report.json
