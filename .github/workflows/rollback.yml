@@ -1,0 +1,51 @@
+name: Rollback Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA to rollback to (leave empty for previous commit)'
+        required: false
+        default: ''
+
+jobs:
+  rollback:
+    name: Rollback to Previous Version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Determine rollback target
+        id: target
+        run: |
+          if [ -z "${{ github.event.inputs.commit_sha }}" ]; then
+            TARGET=$(git rev-parse HEAD~1)
+            echo "Rolling back to previous commit: $TARGET"
+          else
+            TARGET="${{ github.event.inputs.commit_sha }}"
+            echo "Rolling back to specified commit: $TARGET"
+          fi
+          echo "sha=$TARGET" >> $GITHUB_OUTPUT
+
+      - name: Rollback to target commit
+        run: |
+          git checkout ${{ steps.target.outputs.sha }}
+
+      - name: Push rollback to HuggingFace
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git push https://urvpatel:${HF_TOKEN}@huggingface.co/spaces/urvpatel/rag-pipeline-optimizer HEAD:main --force
+
+      - name: Report rollback success
+        run: |
+          echo "✅ Successfully rolled back to commit: ${{ steps.target.outputs.sha }}"

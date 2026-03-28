@@ -13,7 +13,7 @@ A production-grade benchmarking system that runs 4 RAG pipeline configurations s
 
 ---
 
-![CI Pipeline](https://github.com/devurvpatel/rag-pipeline-optimizer/actions/workflows/ci.yml/badge.svg)
+![CI/CD Pipeline](https://github.com/devurvpatel/rag-pipeline-optimizer/actions/workflows/ci.yml/badge.svg)
 ![Security Scan](https://github.com/devurvpatel/rag-pipeline-optimizer/actions/workflows/security-scan.yml/badge.svg)
 
 ---
