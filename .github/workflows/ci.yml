@@ -130,7 +130,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git remote add huggingface https://urvpatel:${HF_TOKEN}@huggingface.co/spaces/urvpatel/rag-pipeline-optimizer
-            git filter-branch --force --index-filter \
-              "git rm --cached --ignore-unmatch assets/demo.mp4" \
-              --prune-empty --tag-name-filter cat -- --all
-            git push huggingface master:main --force
+          git filter-branch --force --index-filter \
+            "git rm --cached -r --ignore-unmatch assets/" \
+            --prune-empty --tag-name-filter cat -- --all
+          git push huggingface master:main --force
