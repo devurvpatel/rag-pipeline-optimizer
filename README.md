@@ -13,16 +13,32 @@ A production-grade benchmarking system that runs 4 RAG pipeline configurations s
 
 ---
 
-![CI/CD Pipeline](https://github.com/devurvpatel/rag-pipeline-optimizer/actions/workflows/ci.yml/badge.svg)
-![Security Scan](https://github.com/devurvpatel/rag-pipeline-optimizer/actions/workflows/security-scan.yml/badge.svg)
-
----
-
 ## 🎯 Why This Project Is Different
 
 This project asks a harder question: **which RAG configuration actually works best for your data?**
 
 This is A/B testing for AI retrieval systems. Companies spend months guessing whether their RAG is good. This system tells them in minutes by running 4 pipelines in parallel, scoring each on faithfulness, answer relevancy, context precision, and context recall using the industry-standard RAGAS evaluation framework then having a LangGraph agent synthesize the scores and cost data into a structured recommendation.
+
+---
+
+![CI/CD Pipeline](https://github.com/devurvpatel/rag-pipeline-optimizer/actions/workflows/ci.yml/badge.svg)
+![Security Scan](https://github.com/devurvpatel/rag-pipeline-optimizer/actions/workflows/security-scan.yml/badge.svg)
+
+---
+
+## 🔄 CI/CD Pipeline
+
+Every push to `master` triggers a 4-stage automated pipeline:
+
+1. **Code Quality & Security** — Ruff linting + Bandit security scan + Safety CVE check
+2. **Automated Tests** — 47 tests across document processing, pipelines, vector stores, and LangGraph agent
+3. **Docker Build Verification** — Full container build on clean Ubuntu environment
+4. **Automated Deployment** — Deploys to HuggingFace Spaces only after all gates pass
+
+Additional workflows:
+- **Weekly Security Scan** — Every Monday CVE check against latest vulnerability database
+- **One-Click Rollback** — Manual workflow to revert HuggingFace to any previous commit
+- **Release Automation** — Auto-generates versioned releases with changelogs on every push
 
 ---
 
