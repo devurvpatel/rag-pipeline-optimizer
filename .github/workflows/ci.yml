@@ -110,7 +110,7 @@ jobs:
   deploy:
     name: Deploy to HuggingFace
     runs-on: ubuntu-latest
-    # needs: [quality-gate, test, docker-build]
+    needs: [quality-gate, test, docker-build]
     if: github.ref == 'refs/heads/master'
 
     steps:
