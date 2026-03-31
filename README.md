@@ -141,35 +141,6 @@ live cost tracking, winner recommendation)
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Python 3.11
-- Docker Desktop
-- API keys: OpenAI, Cohere, Qdrant (free tier), LangSmith (free tier)
-
-### Local Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/devurvpatel/rag-pipeline-optimizer.git
-cd rag-pipeline-optimizer
-
-# Create virtual environment
-python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Mac/Linux
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure environment variables
-cp .env.example .env
-# Fill in your API keys in .env
-```
-
----
-
 ### 📝 4 Pipeline Answers Side by Side
 ![4 Pipeline Answers](assets/4%20pipeline%20answers.png)
 
