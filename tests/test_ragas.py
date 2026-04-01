@@ -75,7 +75,7 @@ async def main():
     ]
 
     for num, name in pipeline_configs:
-        result = evaluate_pipeline(
+        result = await evaluate_pipeline(
             pipeline_name=name,
             questions=TEST_QUESTIONS,
             answers=all_answers[num],

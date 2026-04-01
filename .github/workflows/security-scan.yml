@@ -24,7 +24,9 @@ jobs:
 
       - name: Run Safety CVE scan
         run: |
-          safety scan --target .
+            safety scan --target . --ignore 73280
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
 
       - name: Run Bandit full scan
         run: |

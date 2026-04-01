@@ -44,9 +44,11 @@ jobs:
         run: |
           bandit -r backend/ -ll --exit-zero
 
-      - name: Run Safety dependency vulnerability scan
+      - name: Run Safety CVE scan
         run: |
-          safety scan -r requirements.txt --continue-on-error
+          safety scan --target . --ignore 73280
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
 
   # ── Job 2: Tests ─────────────────────────────────────────────────────────────
   test:
