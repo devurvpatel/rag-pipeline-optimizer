@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Safety dependency vulnerability scan
         run: |
-          safety check -r requirements.txt --continue-on-error
+          safety scan -r requirements.txt --continue-on-error
 
   # ── Job 2: Tests ─────────────────────────────────────────────────────────────
   test:
