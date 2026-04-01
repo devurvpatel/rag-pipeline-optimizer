@@ -24,7 +24,7 @@ jobs:
 
       - name: Run Safety CVE scan
         run: |
-          safety check -r requirements.txt
+          safety scan -r requirements.txt
 
       - name: Run Bandit full scan
         run: |
